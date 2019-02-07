@@ -142,7 +142,73 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        factAsserted = False
+        ruleAsserted = False
+        # fact = ""
+        # rule = ""
+        string = ""
 
+        if fact_or_rule not in self.facts and fact_or_rule not in self.rules:
+            if isinstance(fact_or_rule, Fact):
+                s = "Fact is not in the KB"
+                return s
+            elif isinstance(fact_or_rule, Rule):
+                s = "Rule is not in the KB"
+                return s
+            else:
+                return False
+
+        if fact_or_rule in self.facts:
+            string += "{}\n".format(self.formatFact(fact_or_rule))
+
+        elif fact_or_rule in self.rules:
+            string += "{}\n".format(self.formatRule(fact_or_rule))
+
+        if fact_or_rule.supported_by:
+            string += "SUPPORTED BY \n"
+            for f in fact_or_rule.supported_by:
+                if f[0].asserted:
+                    factAsserted = True
+                fact = f[0]
+                string += "  {}\n".format(self.formatFact(fact, factAsserted))
+                if fact.supported_by:
+                    self.kb_explain(fact)
+
+                if f[1].asserted:
+                    ruleAsserted = True
+                rule = f[1]
+                string += "  {}\n".format(self.formatRule(rule, ruleAsserted))
+                if rule.supported_by:
+                    self.kb_explain(rule)
+        else:
+            return string
+
+    def formatFact(self, fact, asserted=False):
+        string = ""
+        if isinstance(fact, Fact):
+            string = fact.name +": " + str(fact.statement)
+
+            if asserted:
+                string += " ASSERTED"
+
+        return string
+
+    def formatRule(self, rule, asserted=False):
+        string = ""
+
+        if isinstance(rule, Rule):
+            if len(rule.lhs) > 1:
+                for l in rule.lhs[0:]:
+                    string += str(l) + ", "
+            else:
+                string = str(rule.lhs)
+
+            string += " -> {}".format(str(rule.rhs))
+
+            if asserted:
+                string += " ASSERTED"
+
+        return string
 
 class InferenceEngine(object):
     def fc_infer(self, fact, rule, kb):
