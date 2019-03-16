@@ -142,51 +142,86 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
-        factAsserted = False
-        ruleAsserted = False
-        # fact = ""
-        # rule = ""
         string = ""
+        FRasserted = False
 
-        if fact_or_rule not in self.facts and fact_or_rule not in self.rules:
+        if fact_or_rule in self.facts or fact_or_rule in self.rules:
+
             if isinstance(fact_or_rule, Fact):
-                s = "Fact is not in the KB"
-                return s
+                obj = self._get_fact(fact_or_rule)
+                if obj.asserted:
+                    FRasserted = True
+                string += "{}".format(self.formatFact(fact_or_rule, FRasserted)) + '\n'
+
             elif isinstance(fact_or_rule, Rule):
-                s = "Rule is not in the KB"
-                return s
-            else:
-                return False
+                obj = self._get_rule(fact_or_rule)
+                if obj.asserted:
+                    FRasserted = True
+                string += "{}".format(self.formatRule(fact_or_rule, FRasserted)) + '\n'
 
-        if fact_or_rule in self.facts:
-            string += "{}\n".format(self.formatFact(fact_or_rule))
+            string = self.supportedBy(obj, string)
 
-        elif fact_or_rule in self.rules:
-            string += "{}\n".format(self.formatRule(fact_or_rule))
-
-        if fact_or_rule.supported_by:
-            string += "SUPPORTED BY \n"
-            for f in fact_or_rule.supported_by:
-                if f[0].asserted:
-                    factAsserted = True
-                fact = f[0]
-                string += "  {}\n".format(self.formatFact(fact, factAsserted))
-                if fact.supported_by:
-                    self.kb_explain(fact)
-
-                if f[1].asserted:
-                    ruleAsserted = True
-                rule = f[1]
-                string += "  {}\n".format(self.formatRule(rule, ruleAsserted))
-                if rule.supported_by:
-                    self.kb_explain(rule)
         else:
-            return string
+            if fact_or_rule not in self.facts and fact_or_rule not in self.rules:
+                if isinstance(fact_or_rule, Fact):
+                    string = "Fact is not in the KB"
 
-    def formatFact(self, fact, asserted=False):
+                elif isinstance(fact_or_rule, Rule):
+                    string = "Rule is not in the KB"
+
+                else:
+                    string = False
+
+        return string
+
+    def supportedBy(self, obj, string, index=1):
+        # Function to recursively find and print supported facts and rules
+
+        for f in obj.supported_by:
+            string += '  {}SUPPORTED BY'.format(self.indent(index - 1) if index > 1 else "")
+            string += '\n'
+
+            # Print fact (f[0]), check if asserted, and find supported_by
+            asserted = False
+            if f[0].asserted:
+                asserted = True
+            string += "{}{}".format(self.indent(index), self.formatFact(f[0], asserted))
+            string += '\n'
+
+            if f[0].supported_by:
+                index += 1
+                string = self.supportedBy(f[0], string, index)
+
+            # Print rule (f[1]), check if asserted, and find supported_by
+            asserted = False
+            if f[1].asserted:
+                asserted = True
+            string += "{}{}".format(self.indent(index), self.formatRule(f[1], asserted))
+            string += '\n'
+
+            if f[1].supported_by:
+                index += 1
+                string = self.supportedBy(f[1], string, index)
+
+            # Reset index
+            index = 1
+        return string
+
+    def indent(self, index):
+        # Function to iteratively indent
+
+        string = ''
+        for i in range(index):
+            string += '    '
+
+        return string
+
+    def formatFact(self, fact, asserted):
+        # Pretty print facts
+
         string = ""
         if isinstance(fact, Fact):
-            string = fact.name +": " + str(fact.statement)
+            string = fact.name + ": " + str(fact.statement)
 
             if asserted:
                 string += " ASSERTED"
@@ -194,14 +229,21 @@ class KnowledgeBase(object):
         return string
 
     def formatRule(self, rule, asserted=False):
+        # Pretty print rules
+
         string = ""
 
         if isinstance(rule, Rule):
-            if len(rule.lhs) > 1:
-                for l in rule.lhs[0:]:
-                    string += str(l) + ", "
-            else:
-                string = str(rule.lhs)
+            string = rule.name + ": "
+            string += "("
+            for l in rule.lhs:
+                if l != rule.lhs[0]:
+                    string += ", "
+                string += "(" + str(l.predicate)
+                for t in l.terms:
+                    string += " " + str(t)
+                string += ")"
+            string += ")"
 
             string += " -> {}".format(str(rule.rhs))
 
