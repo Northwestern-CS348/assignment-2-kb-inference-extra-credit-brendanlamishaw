@@ -1,23 +1,17 @@
 TESTS WITH ERRORS 
-test03 (gradingtests.UnitTests)
-Traceback (most recent call last):
-  File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference-ec/gradingtests.py", line 73, in test03
-    self.compare(self.KB.kb_explain(fact4), answer1)
-  File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference-ec/gradingtests.py", line 13, in compare
-    elist = expected.split('\n')
-AttributeError: 'NoneType' object has no attribute 'split'
-
 -------------------------------
 TESTS FAILED  
-test04 (gradingtests.UnitTests)
+test03 (gradingtests.UnitTests)
 Traceback (most recent call last):
-  File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference-ec/gradingtests.py", line 135, in test04
+  File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference-ec/gradingtests.py", line 74, in test03
     self.compare(self.expected, actual)
   File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference-ec/gradingtests.py", line 18, in compare
     '"{0}" ({1} lead spaces)'.format(a, len(a) - len(a.strip())))
-AssertionError: '"  SUPPORTED BY" (2 lead spaces)' != '"" (0 lead spaces)'
-- "  SUPPORTED BY" (2 lead spaces)
-+ "" (0 lead spaces)
+AssertionError: '"        rule: ((on ?x ?y), (bigger ?x ?y)) -> (co[31 chars]ces)' != '"            rule: ((on ?x ?y), (bigger ?x ?y)) ->[36 chars]ces)'
+- "        rule: ((on ?x ?y), (bigger ?x ?y)) -> (covered ?y) ASSERTED" (8 lead spaces)
+?                                                                        ^
++ "            rule: ((on ?x ?y), (bigger ?x ?y)) -> (covered ?y) ASSERTED" (12 lead spaces)
+?  ++++                                                                      ^^
 
 
 -------------------------------
